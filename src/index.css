@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.custom-ant-table .ant-table-thead > tr > th {
+  @apply text-center;
+}
+
+.custom-ant-table .ant-table-tbody {
+  @apply text-center;
+}
