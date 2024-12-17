@@ -1,27 +1,32 @@
-# Stage 1: Build Vite App
-FROM node:16 as build
+# Gunakan Node.js untuk build tahap awal
+FROM node:18 AS builder
 
+# Set work directory
 WORKDIR /app
 
-# Install dependencies dan build aplikasi
-COPY package*.json ./
+# Copy file package.json dan package-lock.json
+COPY package.json package-lock.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy semua file ke dalam container
 COPY . .
+
+# Build aplikasi React menggunakan Vite
 RUN npm run build
 
-# Stage 2: Serve Aplikasi dengan Nginx
-FROM nginx:alpine
+# Tahap kedua: Nginx untuk hosting aplikasi frontend
+FROM nginx:stable-alpine
 
-# Hapus konfigurasi default Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Copy hasil build ke dalam direktori default Nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy hasil build ke Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copy konfigurasi Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy konfigurasi Nginx (opsional)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
+# Expose port 80 untuk kontainer
 EXPOSE 80
 
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
